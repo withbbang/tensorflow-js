@@ -18,7 +18,7 @@ const handleGetModels = async () => {
 };
 
 const handleGetFaceDescriptions = async () => {
-  const input = document.getElementById("img");
+  const input = document.getElementById("video");
   fullFaceDescriptions = await faceapi
     .detectAllFaces(input)
     .withFaceLandmarks()
@@ -30,6 +30,14 @@ const handleCorrespondImage = () => {
 };
 
 const handleDrawDetections = () => {
-  const canvas = document.getElementById("canvas");
-  faceapi.draw.drawDetections(canvas, fullFaceDescriptions);
+  //   const canvas = faceapi.createCanvasFromMedia(document.getElementById("img"));
+  const video = faceapi.createCanvasFromMedia(document.getElementById("video"));
+  const div = document.getElementById("div");
+  div.append(video);
+
+  video.style.position = "absolute";
+  video.style.top = "0px";
+  video.style.left = "0px";
+  faceapi.draw.drawDetections(video, fullFaceDescriptions);
+  faceapi.draw.drawFaceLandmarks(video, fullFaceDescriptions);
 };
