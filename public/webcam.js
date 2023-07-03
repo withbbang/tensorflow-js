@@ -1,60 +1,62 @@
 "use strict";
 
+const MODEL_URL = "/models";
+
+const video = document.getElementById("video");
+
 document.addEventListener("DOMContentLoaded", async () => {
-  await handleGetModels();
-  await handleGetFaceDescriptions();
+  await playVideo();
+
+  video.addEventListener("play", () => {
+    // ### Creating a Canvas Element from an Image or Video Element
+    const VideoCanvas = faceapi.createCanvasFromMedia(video);
+    document.body.append(VideoCanvas);
+
+    // ### Init configs
+    const displayValues = {
+      width: 640,
+      height: 480,
+    };
+
+    // ### Resize media elements
+    faceapi.matchDimensions(VideoCanvas, displayValues);
+
+    setInterval(async () => {
+      const detections = await faceapi
+        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks() // detect landmark
+        .withFaceDescriptors(); // detect descriptor around face
+
+      // ### Input in to console result's detection
+      // detections.map(console.log)
+
+      const resizedDetections = faceapi.resizeResults(
+        detections,
+        displayValues
+      );
+
+      // ### Clear before picture
+      VideoCanvas.getContext("2d").clearRect(
+        0,
+        0,
+        VideoCanvas.width,
+        VideoCanvas.height
+      );
+
+      // ### Drawing  in to VideoCanvas
+      faceapi.draw.drawDetections(VideoCanvas, resizedDetections);
+    }, 100);
+  });
 });
 
-// 훈련 모델 가져오기
-const handleGetModels = async () => {
-  const MODEL_URL = "/models";
+async function playVideo() {
+  await faceapi.nets.tinyFaceDetector.loadFromUri("./models"),
+    await faceapi.nets.faceLandmark68Net.loadFromUri("./models"),
+    await faceapi.nets.faceRecognitionNet.loadFromUri("./models"),
+    await faceapi.nets.faceExpressionNet.loadFromUri("./models");
 
-  await faceapi.loadMtcnnModel(MODEL_URL);
-  await faceapi.loadFaceRecognitionModel(MODEL_URL);
-
-  const video = document.getElementById("video");
-
-  navigator.getUserMedia(
-    { video: {} },
-    (stream) => (video.srcObject = stream),
-    (err) => console.log(err),
-  );
-};
-
-// 얼굴 인식 정보 처리하기
-const handleGetFaceDescriptions = async () => {
-  const mtcnnForwardParams = {
-    // number of scaled versions of the input image passed through the CNN
-    // of the first stage, lower numbers will result in lower inference time,
-    // but will also be less accurate
-    maxNumScales: 10,
-    // scale factor used to calculate the scale steps of the image
-    // pyramid used in stage 1
-    scaleFactor: 0.709,
-    // the score threshold values used to filter the bounding
-    // boxes of stage 1, 2 and 3
-    scoreThresholds: [0.6, 0.7, 0.7],
-    // mininum face size to expect, the higher the faster processing will be,
-    // but smaller faces won't be detected
-    minFaceSize: 20,
-    // limiting the search space to larger faces for webcam detection
-    minFaceSize: 200,
-  };
-
-  const videoTag = document.getElementById("video");
-
-  const mtcnnResults = await faceapi.mtcnn(videoTag, mtcnnForwardParams);
-  const video = await faceapi.createCanvasFromMedia(videoTag);
-
-  await faceapi.drawDetection(
-    video,
-    mtcnnResults.map((res) => res.faceDetection),
-    { withScore: false },
-  );
-
-  await faceapi.drawLandmarks(
-    video,
-    mtcnnResults.map((res) => res.faceLandmarks),
-    { lineWidth: 4, color: "red" },
-  );
-};
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+  });
+  video.srcObject = stream;
+}

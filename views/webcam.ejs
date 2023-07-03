@@ -4,13 +4,22 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script defer type="text/javascript" src="face-api.js"></script>
     <title>Tensorflow JS Practice</title>
+    <style>
+      #video,
+      canvas {
+        position: absolute;
+        width: 640px;
+        height: 480px;
+      }
+    </style>
   </head>
   <body>
     <div id="div" style="display: block; position: relative">
-      <video id="video" onplay="onPlay(this)" autoplay muted></video>
+      <video id="video" autoplay muted></video>
+      <canvas id="canvas"></canvas>
     </div>
   </body>
-  <script type="text/javascript" src="face-api.js"></script>
   <script type="text/javascript" src="webcam.js"></script>
 </html>
