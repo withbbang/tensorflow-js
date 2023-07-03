@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // ### Drawing  in to VideoCanvas
       faceapi.draw.drawDetections(VideoCanvas, resizedDetections);
+      faceapi.draw.drawFaceLandmarks(VideoCanvas, resizedDetections);
     }, 100);
   });
 });
